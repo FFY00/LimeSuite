@@ -117,7 +117,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         {
             status = mcuControl->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, IConnection::MCU_PROG_MODE::SRAM);
             if(status != 0){
-                lime::error("Breakppoint #1 - Program_MCU() failed");
+                lime::debug("Breakpoint #1 - Program_MCU() failed");
                 return status;
             }
         }
@@ -155,7 +155,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
     if(status != 0)
     {
         RestoreRegisterMap(registersBackup);
-        lime::error("Breakpoint #2 - TuneRxFilterSetup() failed");
+        lime::debug("Breakpoint #2 - TuneRxFilterSetup() failed");
         return status;
     }
 
@@ -223,7 +223,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
                 }
             }
             else if(status != 0){
-                lime::error("Breakpoint #5 - LPFL failed");
+                lime::debug("Breakpoint #5 - LPFL failed");
                 return status;
             }
             //LPFL END
@@ -265,7 +265,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
                 }
             }
             else if(status != 0){
-                lime::error("Breakpoint #6 - LPFH failed");
+                lime::debug("Breakpoint #6 - LPFH failed");
                 return status;
             }
             //LPFH END
@@ -274,14 +274,14 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #7 - SetFrequencySX() failed");
+            lime::debug("Breakpoint #7 - SetFrequencySX() failed");
             return status;
         }
         status = SetNCOFrequency(LMS7002M::Rx, 0, rx_lpf_IF);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #8 - SetNCOFrequency() failed");
+            lime::debug("Breakpoint #8 - SetNCOFrequency() failed");
             return status;
         }
         Modify_SPI_Reg_bits(LMS7param(CFB_TIA_RFE), g_tia_rfe);
@@ -320,7 +320,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #9 - RxFilterSearch() failed");
+            lime::debug("Breakpoint #9 - RxFilterSearch() failed");
             return status;
         }
         //END TIA
@@ -331,14 +331,14 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #10 - SetFrequencySX() failed");
+            lime::debug("Breakpoint #10 - SetFrequencySX() failed");
             return status;
         }
         status = SetNCOFrequency(LMS7002M::Rx, 0, rx_lpf_IF);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #11 - SetNCOFrequency() failed");
+            lime::debug("Breakpoint #11 - SetNCOFrequency() failed");
             return status;
         }
         //START TIA
@@ -346,7 +346,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
-            lime::error("Breakpoint #12 - RxFilterSearch() failed");
+            lime::debug("Breakpoint #12 - RxFilterSearch() failed");
             return status;
         }
         //END TIA
@@ -697,7 +697,7 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
 
     status = SetFrequencyCGEN(46.08e6 * cgenMultiplier + 10e6);
     if(status != 0){
-        lime::error("Breakpoint #13 - SetFrequencyCGEN() failed");
+        lime::debug("Breakpoint #13 - SetFrequencyCGEN() failed");
         return status;
     }
 
@@ -708,7 +708,7 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
     Modify_SPI_Reg_bits(LMS7param(ICT_VCO), ict_vco);
     status = SetFrequencySX(LMS7002M::Rx, 539.9e6);
     if(status != 0){
-        lime::error("Breakpoint #14 - SetFrequencySX() failed");
+        lime::debug("Breakpoint #14 - SetFrequencySX() failed");
         return status;
     }
 
@@ -719,7 +719,7 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
     Modify_SPI_Reg_bits(LMS7param(ICT_VCO), ict_vco);
     status = SetFrequencySX(LMS7002M::Tx, 550e6);
     if(status != 0){
-        lime::error("Breakpoint #15 - SetNCOFrequency() failed");
+        lime::debug("Breakpoint #15 - SetNCOFrequency() failed");
         return status;
     }
 
@@ -860,7 +860,7 @@ int LMS7002M::TuneTxFilterSetup(const float_type tx_lpf_IF)
 
     status = SetFrequencyCGEN(46.08e6 * cgenMultiplier + 10e6);
     if(status != 0){
-        lime::error("Breakpoint #16 - SetFrequencyCGEN() failed");
+        lime::debug("Breakpoint #16 - SetFrequencyCGEN() failed");
         return status;
     }
 
@@ -924,7 +924,7 @@ int LMS7002M::TuneTxFilter(const float_type tx_lpf_freq_RF)
         {
             status = mcuControl->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, IConnection::MCU_PROG_MODE::SRAM);
             if(status != 0){
-                lime::error("Breakpoint #17 - Program_MCU() failed");
+                lime::debug("Breakpoint #17 - Program_MCU() failed");
                 return status;
             }
         }
@@ -951,7 +951,7 @@ int LMS7002M::TuneTxFilter(const float_type tx_lpf_freq_RF)
     if(status != 0)
     {
         RestoreRegisterMap(registersBackup);
-        lime::error("Breakpoint #18 - TuneTxFilterSetup() failed");
+        lime::debug("Breakpoint #18 - TuneTxFilterSetup() failed");
         return status;
     }
 

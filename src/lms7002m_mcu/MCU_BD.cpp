@@ -582,12 +582,12 @@ int MCU_BD::Program_MCU(int m_iMode1, int m_iMode0)
 int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE mode)
 {
     if(!m_serPort){
-        lime::error("Breakpoint #19 - Device not connected");
+        lime::debug("Breakpoint #19 - Device not connected");
         return ReportError(ENOLINK, "Device not connected");
     }
 
     if (byte_array_size <= 8192){
-        lime::error("Breakpoint #20 - byte_array_size <= 8192");
+        lime::debug("Breakpoint #20 - byte_array_size <= 8192");
         return m_serPort->ProgramMCU(buffer, byte_array_size, mode, callback);
     }
 
@@ -609,7 +609,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
     wrdata[0] = controlAddr | 0;
     wrdata[1] = controlAddr | (mode & 0x3);
     if((status = m_serPort->WriteLMS7002MSPI(wrdata, 2, mChipID))!=0){
-        lime::error("Breakpoint #21 - WriteLMS7002MSPI() failed");
+        lime::debug("Breakpoint #21 - WriteLMS7002MSPI() failed");
         return status;
     }
 
@@ -625,7 +625,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
         auto t2 = t1;
         do{
             if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0){
-                lime::error("Breakpoint #22 - ReadLMS7002MSPI() failed");
+                lime::debug("Breakpoint #22 - ReadLMS7002MSPI() failed");
                 return status;
             }
             fifoEmpty = rddata & EMTPY_WRITE_BUFF;
@@ -633,7 +633,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
         }while( (!fifoEmpty) && (t2-t1)<timeout);
 
         if(!fifoEmpty){
-            lime::error("Breakpoint #23 - MCU FIFO full");
+            lime::debug("Breakpoint #23 - MCU FIFO full");
             return ReportError(ETIMEDOUT, "MCU FIFO full");
         }
 
@@ -641,7 +641,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
         for(uint8_t j=0; j<fifoLen; ++j)
             wrdata[j] = addrDTM | buffer[i+j];
         if((status = m_serPort->WriteLMS7002MSPI(wrdata,fifoLen, mChipID))!=0){
-            lime::error("Breakpoint #24 - WriteLMS7002MSPI() failed");
+            lime::debug("Breakpoint #24 - WriteLMS7002MSPI() failed");
             return status;
         }
         if(callback)
@@ -660,7 +660,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
     auto t2 = t1;
     do{
         if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0){
-            lime::error("Breakpoint #25 - ReadLMS7002MSPI() failed");
+            lime::debug("Breakpoint #25 - ReadLMS7002MSPI() failed");
             return status;
         }
         programmed = rddata & PROGRAMMED;
@@ -673,7 +673,7 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
             (timeEnd-timeStart).count());
 #endif
     if(!programmed){
-        lime::error("Breakpoint #26 - MCU not programmed");
+        lime::debug("Breakpoint #26 - MCU not programmed");
         return ReportError(ETIMEDOUT, "MCU not programmed");
     }
     return 0;
