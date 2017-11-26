@@ -581,11 +581,16 @@ int MCU_BD::Program_MCU(int m_iMode1, int m_iMode0)
 
 int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE mode)
 {
-    if(!m_serPort)
+    if(!m_serPort){
+        lime::error("Breakpoint #19 - Device not connected");
         return ReportError(ENOLINK, "Device not connected");
+    }
 
-    if (byte_array_size <= 8192)
+    if (byte_array_size <= 8192){
+        lime::error("Breakpoint #20 - byte_array_size <= 8192");
         return m_serPort->ProgramMCU(buffer, byte_array_size, mode, callback);
+    }
+
 #ifndef NDEBUG
     auto timeStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -603,8 +608,10 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
         //reset MCU, set mode
     wrdata[0] = controlAddr | 0;
     wrdata[1] = controlAddr | (mode & 0x3);
-    if((status = m_serPort->WriteLMS7002MSPI(wrdata, 2, mChipID))!=0)
+    if((status = m_serPort->WriteLMS7002MSPI(wrdata, 2, mChipID))!=0){
+        lime::error("Breakpoint #21 - WriteLMS7002MSPI() failed");
         return status;
+    }
 
     if(callback)
         abort = callback(0, byte_array_size, "");
@@ -617,20 +624,26 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
         auto t1 = std::chrono::high_resolution_clock::now();
         auto t2 = t1;
         do{
-            if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0)
+            if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0){
+                lime::error("Breakpoint #22 - ReadLMS7002MSPI() failed");
                 return status;
+            }
             fifoEmpty = rddata & EMTPY_WRITE_BUFF;
             t2 = std::chrono::high_resolution_clock::now();
         }while( (!fifoEmpty) && (t2-t1)<timeout);
 
-        if(!fifoEmpty)
+        if(!fifoEmpty){
+            lime::error("Breakpoint #23 - MCU FIFO full");
             return ReportError(ETIMEDOUT, "MCU FIFO full");
+        }
 
         //write 32 bytes into FIFO
         for(uint8_t j=0; j<fifoLen; ++j)
             wrdata[j] = addrDTM | buffer[i+j];
-        if((status = m_serPort->WriteLMS7002MSPI(wrdata,fifoLen, mChipID))!=0)
+        if((status = m_serPort->WriteLMS7002MSPI(wrdata,fifoLen, mChipID))!=0){
+            lime::error("Breakpoint #24 - WriteLMS7002MSPI() failed");
             return status;
+        }
         if(callback)
             abort = callback(i+fifoLen, byte_array_size, "");
 #ifndef NDEBUG
@@ -646,8 +659,10 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = t1;
     do{
-        if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0)
+        if((status = m_serPort->ReadLMS7002MSPI(wrdata, &rddata, 1, mChipID))!=0){
+            lime::error("Breakpoint #25 - ReadLMS7002MSPI() failed");
             return status;
+        }
         programmed = rddata & PROGRAMMED;
         t2 = std::chrono::high_resolution_clock::now();
     }while( (!programmed) && (t2-t1)<timeout);
@@ -657,8 +672,10 @@ int MCU_BD::Program_MCU(const uint8_t* buffer, const IConnection::MCU_PROG_MODE 
             std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEnd-timeStart).count());
 #endif
-    if(!programmed)
+    if(!programmed){
+        lime::error("Breakpoint #26 - MCU not programmed");
         return ReportError(ETIMEDOUT, "MCU not programmed");
+    }
     return 0;
 }
 
