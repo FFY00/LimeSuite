@@ -741,15 +741,19 @@ void SoapyLMS7::setSampleRate(const int direction, const size_t channel, const d
     status = rfic->SetInterfaceFrequency(clockRate,
         int(std::log(double(_interps[channel]))/std::log(2.0))-1,
         int(std::log(double(_decims[channel]))/std::log(2.0))-1);
-    if(status != 0)
+    if(status != 0){
+        SoapySDR::logf(SOAPY_SDR_ERROR, "Breakpoint #35 - SetInterfaceFrequency() failed");
         SoapySDR::logf(SOAPY_SDR_ERROR, GetLastErrorMessage());
+    }
 
     status = _conn->UpdateExternalDataRate(
         rfic->GetActiveChannelIndex(),
         rfic->GetSampleRate(LMS7002M::Tx, rfic->GetActiveChannel()),
         rfic->GetSampleRate(LMS7002M::Rx, rfic->GetActiveChannel()));
-    if(status != 0)
+    if(status != 0){
         SoapySDR::logf(SOAPY_SDR_ERROR, GetLastErrorMessage());
+        SoapySDR::logf(SOAPY_SDR_ERROR, "Breakpoint #36 - UpdateExternalDataRate() failed");
+    }
 }
 
 double SoapyLMS7::getSampleRate(const int direction, const size_t channel) const
