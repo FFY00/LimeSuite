@@ -116,14 +116,16 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(mcuID != MCU_ID_CALIBRATIONS_SINGLE_IMAGE)
         {
             status = mcuControl->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, IConnection::MCU_PROG_MODE::SRAM);
-            if(status != 0)
+            if(status != 0){
+                lime::error("Breakppoint #1 - Program_MCU() failed");
                 return status;
+            }
         }
 
         //set reference clock parameter inside MCU
         long refClk = GetReferenceClk_SX(false);
         mcuControl->SetParameter(MCU_BD::MCU_REF_CLK, refClk);
-        lime::debug("MCU Ref. clock: %g MHz", refClk / 1e6);
+        lime::error("MCU Ref. clock: %g MHz", refClk / 1e6);
         //set bandwidth for MCU to read from register, value is integer stored in MHz
         mcuControl->SetParameter(MCU_BD::MCU_BW, rx_lpf_freq_RF);
         mcuControl->RunProcedure(5);
@@ -153,6 +155,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
     if(status != 0)
     {
         RestoreRegisterMap(registersBackup);
+        lime::error("Breakpoint #2 - TuneRxFilterSetup() failed");
         return status;
     }
 
@@ -182,12 +185,14 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakppoint #3 - SetFrequencySX() failed");
             return status;
         }
         status = SetNCOFrequency(LMS7002M::Rx, 0, rx_lpf_IF*1.3);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakppoint #4 - SetNCOFrequency() failed");
             return status;
         }
 
@@ -217,8 +222,10 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
                     status = RxFilterSearch(LMS7param(C_CTL_LPFL_RBB), rssi_3dB, rssiAvgCount, 2048);
                 }
             }
-            else if(status != 0)
+            else if(status != 0){
+                lime::error("Breakpoint #5 - LPFL failed");
                 return status;
+            }
             //LPFL END
         }
         if(rx_lpf_IF >= 18e6)
@@ -257,20 +264,24 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
                     }
                 }
             }
-            else if(status != 0)
+            else if(status != 0){
+                lime::error("Breakpoint #6 - LPFH failed");
                 return status;
+            }
             //LPFH END
         }
         status = SetFrequencySX(LMS7002M::Rx, 539.9e6-rx_lpf_IF);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #7 - SetFrequencySX() failed");
             return status;
         }
         status = SetNCOFrequency(LMS7002M::Rx, 0, rx_lpf_IF);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #8 - SetNCOFrequency() failed");
             return status;
         }
         Modify_SPI_Reg_bits(LMS7param(CFB_TIA_RFE), g_tia_rfe);
@@ -309,6 +320,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #9 - RxFilterSearch() failed");
             return status;
         }
         //END TIA
@@ -319,12 +331,14 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #10 - SetFrequencySX() failed");
             return status;
         }
         status = SetNCOFrequency(LMS7002M::Rx, 0, rx_lpf_IF);
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #11 - SetNCOFrequency() failed");
             return status;
         }
         //START TIA
@@ -332,6 +346,7 @@ int LMS7002M::TuneRxFilter(float_type rx_lpf_freq_RF)
         if(status != 0)
         {
             RestoreRegisterMap(registersBackup);
+            lime::error("Breakpoint #12 - RxFilterSearch() failed");
             return status;
         }
         //END TIA
@@ -681,8 +696,10 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
     cgenMultiplier = clamp(cgenMultiplier, 2, 13);
 
     status = SetFrequencyCGEN(46.08e6 * cgenMultiplier + 10e6);
-    if(status != 0)
+    if(status != 0){
+        lime::error("Breakpoint #13 - SetFrequencyCGEN() failed");
         return status;
+    }
 
     //SXR
     Modify_SPI_Reg_bits(LMS7param(MAC), 1);
@@ -690,8 +707,10 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
     SetDefaults(SX);
     Modify_SPI_Reg_bits(LMS7param(ICT_VCO), ict_vco);
     status = SetFrequencySX(LMS7002M::Rx, 539.9e6);
-    if(status != 0)
+    if(status != 0){
+        lime::error("Breakpoint #14 - SetFrequencySX() failed");
         return status;
+    }
 
     //SXT
     Modify_SPI_Reg_bits(LMS7param(MAC), 2);
@@ -699,8 +718,10 @@ int LMS7002M::TuneRxFilterSetup(const float_type rx_lpf_IF)
     SetDefaults(SX);
     Modify_SPI_Reg_bits(LMS7param(ICT_VCO), ict_vco);
     status = SetFrequencySX(LMS7002M::Tx, 550e6);
-    if(status != 0)
+    if(status != 0){
+        lime::error("Breakpoint #15 - SetNCOFrequency() failed");
         return status;
+    }
 
     Modify_SPI_Reg_bits(LMS7param(MAC), ch);
     //LimeLight & PAD
@@ -838,8 +859,10 @@ int LMS7002M::TuneTxFilterSetup(const float_type tx_lpf_IF)
     cgenMultiplier = clamp(cgenMultiplier, 2, 13);
 
     status = SetFrequencyCGEN(46.08e6 * cgenMultiplier + 10e6);
-    if(status != 0)
+    if(status != 0){
+        lime::error("Breakpoint #16 - SetFrequencyCGEN() failed");
         return status;
+    }
 
     //SXR
     Modify_SPI_Reg_bits(LMS7param(MAC), 1);
@@ -900,14 +923,16 @@ int LMS7002M::TuneTxFilter(const float_type tx_lpf_freq_RF)
         if(mcuID != MCU_ID_CALIBRATIONS_SINGLE_IMAGE)
         {
             status = mcuControl->Program_MCU(mcu_program_lms7_dc_iq_calibration_bin, IConnection::MCU_PROG_MODE::SRAM);
-            if(status != 0)
+            if(status != 0){
+                lime::error("Breakpoint #17 - Program_MCU() failed");
                 return status;
+            }
         }
 
         //set reference clock parameter inside MCU
         long refClk = GetReferenceClk_SX(false);
         mcuControl->SetParameter(MCU_BD::MCU_REF_CLK, refClk);
-        lime::debug("MCU Ref. clock: %g MHz", refClk / 1e6);
+        lime::error("MCU Ref. clock: %g MHz", refClk / 1e6);
         //set bandwidth for MCU to read from register, value is integer stored in MHz
         mcuControl->SetParameter(MCU_BD::MCU_BW, tx_lpf_freq_RF);
         mcuControl->RunProcedure(6);
@@ -926,6 +951,7 @@ int LMS7002M::TuneTxFilter(const float_type tx_lpf_freq_RF)
     if(status != 0)
     {
         RestoreRegisterMap(registersBackup);
+        lime::error("Breakpoint #18 - TuneTxFilterSetup() failed");
         return status;
     }
 
