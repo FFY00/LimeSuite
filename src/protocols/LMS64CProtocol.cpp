@@ -15,6 +15,7 @@
 #include <iso646.h> // alternative operators for visual c++: not, and, or...
 #include <ADCUnits.h>
 #include <sstream>
+#include "Logger.h"
 using namespace lime;
 
 //! CMD_LMS7002_RST options
@@ -388,7 +389,10 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
 {
     std::lock_guard<std::mutex> lock(mControlPortLock);
     int status = 0;
-    if(IsOpen() == false) ReportError(ENOTCONN, "connection is not open");
+    if(IsOpen() == false){
+        debug("Breakpoint #27 - Connection is not open");
+        ReportError(ENOTCONN, "connection is not open");
+    }
 
     int packetLen;
     eLMS_PROTOCOL protocol = LMS_PROTOCOL_UNDEFINED;
@@ -399,6 +403,7 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
     switch(protocol)
     {
     case LMS_PROTOCOL_UNDEFINED:
+        debug("Breakpoint #28 - Protocol type undefined");
         return ReportError("protocol type undefined");
     case LMS_PROTOCOL_LMS64C:
         packetLen = ProtocolLMS64C::pktLength;
@@ -408,6 +413,8 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
         break;
     default:
         packetLen = 0;
+        std::string log = "Breakpoint #29 - Unknown protocol type " + std::to_string(int(protocol));
+        debug(log.c_str());
         return ReportError("Unknown protocol type %d", int(protocol));
     }
     int outLen = 0;
@@ -448,8 +455,11 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
                 if(pkt.cmd == CMD_LMS7002_RD)
                 {
                     inDataPos = Read(&inBuffer[inDataPos], outLen);
-                    if(inDataPos != outLen)
+                    if(inDataPos != outLen){
+                        std::string log = "Breakpoint #30 - Read(" + std::to_string(outLen) + " bytes) got " +  std::to_string(inDataPos);
+                        debug(log.c_str());
                         status = ReportError("Read(%d bytes) got %d", (int)outLen, (int)inDataPos);
+                    }
                     else
                     {
                         if (callback_logData)
@@ -458,8 +468,11 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
                 }
                 ParsePacket(pkt, inBuffer, inDataPos, protocol);
             }
-            else
+            else{
+                std::string log = "Breakpoint #31 - Write(" + std::to_string(outLen) + " bytes) got " +  std::to_string(bytesWritten);
+                debug(log.c_str());
                 status = ReportError("Write(%d bytes) got %d", (int)outLen, (int)bytesWritten);
+            }
         }
     }
     else
@@ -476,6 +489,8 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
                 int bread = Read(&inBuffer[inDataPos], readLen);
                 if(bread != readLen && protocol != LMS_PROTOCOL_NOVENA)
                 {
+                    std::string log = "Breakpoint #32 - Read(" + std::to_string(readLen) + " bytes) failed";
+                    debug(log.c_str());
                     status = ReportError(EIO, "Read(%d bytes) failed", (int)readLen);
                     break;
                 }
@@ -485,6 +500,8 @@ int LMS64CProtocol::TransferPacket(GenericPacket& pkt)
             }
             else
             {
+                std::string log = "Breakpoint #33 - Write(" + std::to_string(bytesToSend) + " bytes) failed";
+                debug(log.c_str());
                 status = ReportError(EIO, "Write(%d bytes) failed", (int)bytesToSend);
                 break;
             }
@@ -616,8 +633,10 @@ unsigned char* LMS64CProtocol::PreparePacket(const GenericPacket& pkt, int& leng
 */
 int LMS64CProtocol::ParsePacket(GenericPacket& pkt, const unsigned char* buffer, const int length, const eLMS_PROTOCOL protocol)
 {
-    if(protocol == LMS_PROTOCOL_UNDEFINED)
+    if(protocol == LMS_PROTOCOL_UNDEFINED){
+        debug("Breakpoint #34 - Protocol undefined");
         return -1;
+    }
 
     if(protocol == LMS_PROTOCOL_LMS64C)
     {
